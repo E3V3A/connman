@@ -1,0 +1,69 @@
+Name: connman
+Summary: Connection Manager
+Version: 0.76.2
+Release: 1
+Group: Communications/ConnMan
+License: GPLv2
+URL: http://connman.net/
+Sources:
+    - http://www.kernel.org/pub/linux/network/connman/connman-%{version}.tar.bz2
+Description: |
+    Connection Manager provides a daemon for managing Internet connections
+    within embedded devices running the Linux operating system.
+
+Requires:
+    - dbus
+    - wpa_supplicant >= 0.7.1
+    - bluez
+    - ofono
+    - pacrunner
+    - ntp
+    - systemd    
+RequiresPost: 
+    - systemd
+RequiresPreUn:
+    - systemd
+RequiresPostUn:
+    - systemd
+PkgBR:
+    - openconnect
+    - openvpn
+PkgConfigBR:
+    - libiptc
+    - xtables
+    - glib-2.0
+    - dbus-1
+    - libudev >= 145
+
+Configure: configure
+ConfigOptions:
+    - --enable-ethernet=builtin
+    - --enable-wifi=builtin
+    - --enable-ofono=builtin
+    - --enable-bluetooth=builtin
+    - --enable-loopback=builtin
+    - --enable-dnsproxy=builtin
+    - --enable-portal=builtin
+    - --enable-meego=builtin
+    - --enable-openconnect=builtin
+    - --enable-openvpn=builtin
+    - --enable-pacrunner=builtin
+    - --enable-ntpd=builtin
+    - --with-ntpd=/usr/sbin/ntpd
+    - --enable-threads
+    - --enable-test
+    - --with-systemdunitdir=/%{_lib}/systemd/system
+
+SubPackages:
+    - Name: devel
+      Summary: Development files for Connection Manager
+      Group: Development/Libraries
+      Description: connman-devel contains development files for use with connman.
+
+    - Name: test
+      Summary: Test Scripts for Connection Manager
+      Group: Development/Tools
+      Description: Scripts for testing Connman and its functionality
+      Requires:
+        - dbus-python
+        - pygobject2
