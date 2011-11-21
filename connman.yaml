@@ -1,6 +1,6 @@
 Name: connman
 Summary: Connection Manager
-Version: 0.76.2
+Version: 0.77.3
 Release: 1
 Group: Communications/ConnMan
 License: GPLv2
@@ -18,13 +18,6 @@ Requires:
     - ofono
     - pacrunner
     - ntp
-    - systemd    
-RequiresPost: 
-    - systemd
-RequiresPreUn:
-    - systemd
-RequiresPostUn:
-    - systemd
 PkgBR:
     - openconnect
     - openvpn

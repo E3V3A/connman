@@ -1,3 +1,6 @@
+* Mon Nov 21 2011 Marko Saukko <marko.saukko@cybercom.com> - 0.77.3
+- upgraded to 0.77.3 and fixed a bit packaging with systemd.
+
 * Sat Sep 03 2011 Carsten Munk - 0.76.2
 - Drop Intel's WiMAX service from deps
 
