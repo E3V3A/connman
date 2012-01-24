@@ -7,12 +7,12 @@
 
 Name:       connman
 Summary:    Connection Manager
-Version:    0.77.3
+Version:    0.78.2
 Release:    1
 Group:      Communications/ConnMan
 License:    GPLv2
 URL:        http://connman.net/
-Source0:    http://www.kernel.org/pub/linux/network/connman/connman-%{version}.tar.bz2
+Source0:    connectivity-connman-stable-0.78.2-0-g7e67d4b.tar.gz
 Source100:  connman.yaml
 Requires:   dbus
 Requires:   wpa_supplicant >= 0.7.1
@@ -59,30 +59,30 @@ Scripts for testing Connman and its functionality
 
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n connectivity-%{name}-stable-7e67d4b
 
 # >> setup
 # << setup
 
 %build
 # >> build pre
+./bootstrap
 # << build pre
 
 %configure --disable-static \
+    --enable-threads \
     --enable-ethernet=builtin \
     --enable-wifi=builtin \
-    --enable-ofono=builtin \
     --enable-bluetooth=builtin \
-    --enable-loopback=builtin \
-    --enable-dnsproxy=builtin \
-    --enable-portal=builtin \
-    --enable-meego=builtin \
+    --enable-ofono=builtin \
     --enable-openconnect=builtin \
     --enable-openvpn=builtin \
+    --enable-loopback=builtin \
     --enable-pacrunner=builtin \
+    --enable-meego=builtin \
     --enable-ntpd=builtin \
+    --enable-client \
     --with-ntpd=/usr/sbin/ntpd \
-    --enable-threads \
     --enable-test \
     --with-systemdunitdir=/%{_lib}/systemd/system
 
