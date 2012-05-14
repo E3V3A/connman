@@ -7,12 +7,12 @@
 
 Name:       connman
 Summary:    Connection Manager
-Version:    0.78.2
+Version:    1.0
 Release:    1
 Group:      Communications/ConnMan
 License:    GPLv2
 URL:        http://connman.net/
-Source0:    connectivity-connman-stable-0.78.2-0-g7e67d4b.tar.gz
+Source0:    http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.tar.xz
 Source100:  connman.yaml
 Requires:   dbus
 Requires:   wpa_supplicant >= 0.7.1
@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(libiptc)
 BuildRequires:  pkgconfig(xtables)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(dbus-1)
-BuildRequires:  pkgconfig(libudev) >= 145
+BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  openconnect
 BuildRequires:  openvpn
 
@@ -59,14 +59,13 @@ Scripts for testing Connman and its functionality
 
 
 %prep
-%setup -q -n connectivity-%{name}-stable-7e67d4b
+%setup -q -n %{name}-%{version}
 
 # >> setup
 # << setup
 
 %build
 # >> build pre
-./bootstrap
 # << build pre
 
 %configure --disable-static \

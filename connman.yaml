@@ -1,13 +1,13 @@
 Name: connman
 Summary: Connection Manager
-Version: 0.78.2
+Version: 1.0
 Release: 1
 Group: Communications/ConnMan
 License: GPLv2
 URL: http://connman.net/
 Sources:
     # https://github.com/connectivity/connman-stable/tarball/0.78.2
-    - connectivity-connman-stable-0.78.2-0-g7e67d4b.tar.gz
+    - http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.tar.xz
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.
@@ -27,7 +27,7 @@ PkgConfigBR:
     - xtables
     - glib-2.0
     - dbus-1
-    - libudev >= 145
+    - gnutls
 
 Configure: configure
 ConfigOptions:
