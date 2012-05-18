@@ -14,20 +14,18 @@ License:    GPLv2
 URL:        http://connman.net/
 Source0:    http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.tar.xz
 Source100:  connman.yaml
-Requires:   dbus
+Requires:   dbus >= 1.4
 Requires:   wpa_supplicant >= 0.7.1
 Requires:   bluez
 Requires:   ofono
 Requires:   pacrunner
-Requires:   ntp
 Requires:   systemd
 Requires(preun): systemd
 Requires(post): systemd
 Requires(postun): systemd
-BuildRequires:  pkgconfig(libiptc)
 BuildRequires:  pkgconfig(xtables)
-BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(dbus-1)
+BuildRequires:  pkgconfig(glib-2.0) >= 2.28
+BuildRequires:  pkgconfig(dbus-1) >= 1.4
 BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  openconnect
 BuildRequires:  openvpn
@@ -78,10 +76,7 @@ Scripts for testing Connman and its functionality
     --enable-openvpn=builtin \
     --enable-loopback=builtin \
     --enable-pacrunner=builtin \
-    --enable-meego=builtin \
-    --enable-ntpd=builtin \
     --enable-client \
-    --with-ntpd=/usr/sbin/ntpd \
     --enable-test \
     --with-systemdunitdir=/%{_lib}/systemd/system
 

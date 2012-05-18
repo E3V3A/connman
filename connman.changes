@@ -1,3 +1,7 @@
+* Fri May 18 2012 Marko Saukko <sage@merproject.org> - 1.0
+- Dropped ntp package dependency as that has been builtin to connman.
+- Some dependency cleanups.
+
 * Mon May 14 2012 Marko Saukko <sage@merproject.org> - 1.0
 - Update connman to version 1.0
 - Added gnutls build dependency

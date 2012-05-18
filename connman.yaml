@@ -6,27 +6,24 @@ Group: Communications/ConnMan
 License: GPLv2
 URL: http://connman.net/
 Sources:
-    # https://github.com/connectivity/connman-stable/tarball/0.78.2
     - http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.tar.xz
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.
 
 Requires:
-    - dbus
+    - dbus >= 1.4
     - wpa_supplicant >= 0.7.1
     - bluez
     - ofono
     - pacrunner
-    - ntp
 PkgBR:
     - openconnect
     - openvpn
 PkgConfigBR:
-    - libiptc
     - xtables
-    - glib-2.0
-    - dbus-1
+    - glib-2.0 >= 2.28
+    - dbus-1 >= 1.4
     - gnutls
 
 Configure: configure
@@ -40,10 +37,7 @@ ConfigOptions:
     - --enable-openvpn=builtin
     - --enable-loopback=builtin
     - --enable-pacrunner=builtin
-    - --enable-meego=builtin
-    - --enable-ntpd=builtin
     - --enable-client
-    - --with-ntpd=/usr/sbin/ntpd
     - --enable-test
     - --with-systemdunitdir=/%{_lib}/systemd/system
 
