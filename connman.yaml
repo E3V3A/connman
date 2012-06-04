@@ -1,6 +1,6 @@
 Name: connman
 Summary: Connection Manager
-Version: 1.0
+Version: 1.1
 Release: 1
 Group: Communications/ConnMan
 License: GPLv2
@@ -17,12 +17,14 @@ Requires:
     - bluez
     - ofono
     - pacrunner
+
 PkgBR:
     - openconnect
     - openvpn
 PkgConfigBR:
     - xtables
     - glib-2.0 >= 2.28
+    - gthread-2.0 >= 2.16
     - dbus-1 >= 1.4
     - gnutls
 
@@ -41,11 +43,23 @@ ConfigOptions:
     - --enable-test
     - --with-systemdunitdir=/%{_lib}/systemd/system
 
+Files:
+    - "%doc AUTHORS COPYING INSTALL ChangeLog NEWS README"
+    - "%{_sbindir}/*"
+    - "%{_libdir}/%{name}/scripts/*"
+    - "%config %{_sysconfdir}/dbus-1/system.d/*.conf"
+    - "/%{_lib}/systemd/system/connman.service"
+    - "/%{_lib}/systemd/system/network.target.wants/connman.service"
+
 SubPackages:
     - Name: devel
       Summary: Development files for Connection Manager
       Group: Development/Libraries
       Description: connman-devel contains development files for use with connman.
+      Files:
+        - "%doc AUTHORS COPYING INSTALL"
+        - "%{_includedir}/%{name}/*.h"
+        - "%{_libdir}/pkgconfig/*.pc"
 
     - Name: test
       Summary: Test Scripts for Connection Manager
@@ -54,3 +68,5 @@ SubPackages:
       Requires:
         - dbus-python
         - pygobject2
+      Files:
+        - "%{_libdir}/%{name}/test/*"
