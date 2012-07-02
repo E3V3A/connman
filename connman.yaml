@@ -1,12 +1,15 @@
 Name: connman
 Summary: Connection Manager
-Version: 1.2
+Version: 1.3
 Release: 1
 Group: Communications/ConnMan
 License: GPLv2
 URL: http://connman.net/
 Sources:
     - http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.tar.xz
+    - connman.tracing
+Patches:
+    - connman-1.1-tracing.patch
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.
@@ -70,3 +73,10 @@ SubPackages:
         - pygobject2
       Files:
         - "%{_libdir}/%{name}/test/*"
+
+    - Name: tracing
+      Summary: Configuration for Connection Manager to enable tracing
+      Group: Development/Tools
+      Description: Will enable tracing for ConnMan
+      Files:
+        - "%config %{_sysconfdir}/tracing/connman"
