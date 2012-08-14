@@ -9,13 +9,14 @@ Name:       connman
 # << macros
 
 Summary:    Connection Manager
-Version:    1.3
+Version:    1.4
 Release:    1
 Group:      Communications/ConnMan
 License:    GPLv2
 URL:        http://connman.net/
 Source0:    http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.tar.xz
 Source1:    connman.tracing
+Source2:    main.conf
 Source100:  connman.yaml
 Patch0:     connman-1.1-tracing.patch
 Requires:   dbus >= 1.4
@@ -23,6 +24,7 @@ Requires:   wpa_supplicant >= 0.7.1
 Requires:   bluez
 Requires:   ofono
 Requires:   pacrunner
+Requires:   connman-configs
 Requires:   systemd
 Requires(preun): systemd
 Requires(post): systemd
@@ -66,6 +68,17 @@ Requires:   %{name} = %{version}-%{release}
 %description tracing
 Will enable tracing for ConnMan
 
+%package configs-mer
+Summary:    Package to provide default configs for connman
+Group:      Development/Tools
+Requires:   %{name} = %{version}-%{release}
+Provides:   connman-configs
+
+%description configs-mer
+This package provides default configs for connman, such as
+FallbackTimeservers.
+
+
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -103,29 +116,37 @@ rm -rf %{buildroot}
 # >> install pre
 # << install pre
 %make_install
+mkdir -p %{buildroot}%{_sysconfdir}/tracing/connman/
+cp -a %{SOURCE1} %{buildroot}%{_sysconfdir}/tracing/connman/
+mkdir -p %{buildroot}%{_sysconfdir}/connman/
+cp -a %{SOURCE2} %{buildroot}%{_sysconfdir}/connman/
+
 
 # >> install post
 mkdir -p %{buildroot}/%{_lib}/systemd/system/network.target.wants
 ln -s ../connman.service %{buildroot}/%{_lib}/systemd/system/network.target.wants/connman.service
-
-mkdir -p %{buildroot}/%{_sysconfdir}/tracing/
-cp %{SOURCE1} %{buildroot}/%{_sysconfdir}/tracing/connman
-
-
 # << install post
 
 
 %preun
+# >> preun
 if [ "$1" -eq 0 ]; then
 systemctl stop connman.service
 fi
+# << preun
 
 %post
+# >> post
 systemctl daemon-reload
-systemctl reload-or-try-restart connman.service
+# Do not restart connman here or network breaks.
+# We can't reload it either as connman doesn't
+# support that feature.
+# << post
 
 %postun
+# >> postun
 systemctl daemon-reload
+# << postun
 
 %files
 %defattr(-,root,root,-)
@@ -157,3 +178,9 @@ systemctl daemon-reload
 %config %{_sysconfdir}/tracing/connman
 # >> files tracing
 # << files tracing
+
+%files configs-mer
+%defattr(-,root,root,-)
+%config %{_sysconfdir}/connman/main.conf
+# >> files configs-mer
+# << files configs-mer
