@@ -1,0 +1,25 @@
+From fdaeadd941a530a7df1f007067dc12821044dfe2 Mon Sep 17 00:00:00 2001
+From: Marko Saukko <marko.saukko@jollamobile.com>
+Date: Thu, 8 Nov 2012 12:30:32 +0000
+Subject: [PATCH 2/2] Restart connman always when it exits
+
+Signed-off-by: Marko Saukko <marko.saukko@jollamobile.com>
+---
+ src/connman.service.in |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/connman.service.in b/src/connman.service.in
+index e2e7a83..35dbff9 100644
+--- a/src/connman.service.in
++++ b/src/connman.service.in
+@@ -8,6 +8,7 @@ BusName=net.connman
+ EnvironmentFile=-/etc/tracing/connman
+ ExecStart=@prefix@/sbin/connmand -n $TRACING
+ StandardOutput=null
++Restart=always
+ 
+ [Install]
+ WantedBy=multi-user.target
+-- 
+1.7.10.3
+

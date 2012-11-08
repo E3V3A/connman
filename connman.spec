@@ -9,7 +9,7 @@ Name:       connman
 # << macros
 
 Summary:    Connection Manager
-Version:    1.4
+Version:    1.9
 Release:    1
 Group:      Communications/ConnMan
 License:    GPLv2
@@ -18,7 +18,8 @@ Source0:    http://www.kernel.org/pub/linux/network/connman/%{name}-%{version}.t
 Source1:    connman.tracing
 Source2:    main.conf
 Source100:  connman.yaml
-Patch0:     connman-1.1-tracing.patch
+Patch0:     0001-Enable-tracing-with-config-file-for-connman.patch
+Patch1:     0002-Restart-connman-always-when-it-exits.patch
 Requires:   dbus >= 1.4
 Requires:   wpa_supplicant >= 0.7.1
 Requires:   bluez
@@ -36,6 +37,7 @@ BuildRequires:  pkgconfig(dbus-1) >= 1.4
 BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  openconnect
 BuildRequires:  openvpn
+BuildRequires:  readline-devel
 
 %description
 Connection Manager provides a daemon for managing Internet connections
@@ -83,8 +85,10 @@ FallbackTimeservers.
 %prep
 %setup -q -n %{name}-%{version}
 
-# connman-1.1-tracing.patch
+# 0001-Enable-tracing-with-config-file-for-connman.patch
 %patch0 -p1
+# 0002-Restart-connman-always-when-it-exits.patch
+%patch1 -p1
 # >> setup
 # << setup
 
@@ -150,7 +154,7 @@ systemctl daemon-reload
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS COPYING INSTALL ChangeLog NEWS README
+%doc AUTHORS COPYING ChangeLog README
 %{_sbindir}/*
 %{_libdir}/%{name}/scripts/*
 %config %{_sysconfdir}/dbus-1/system.d/*.conf
@@ -161,7 +165,7 @@ systemctl daemon-reload
 
 %files devel
 %defattr(-,root,root,-)
-%doc AUTHORS COPYING INSTALL
+%doc AUTHORS COPYING
 %{_includedir}/%{name}/*.h
 %{_libdir}/pkgconfig/*.pc
 # >> files devel

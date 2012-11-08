@@ -1,3 +1,6 @@
+* Thu Nov 08 2012 Marko Saukko <marko.saukko@jollamobile.com> - 1.9
+- Fixes MER#600: Update to version 1.9
+
 * Tue Aug 14 2012 Marko Saukko <marko.saukko@jollamobile.com> - 1.4
 - Update to connman 1.4
 - Fixes MER#538: Added connman-configs-mer package that provides default configs 

@@ -1,6 +1,6 @@
 Name: connman
 Summary: Connection Manager
-Version: 1.4
+Version: 1.9
 Release: 1
 Group: Communications/ConnMan
 License: GPLv2
@@ -11,7 +11,8 @@ ExtraSources:
     - connman.tracing;%{_sysconfdir}/tracing/connman/
     - main.conf;%{_sysconfdir}/connman/
 Patches:
-    - connman-1.1-tracing.patch
+    - 0001-Enable-tracing-with-config-file-for-connman.patch
+    - 0002-Restart-connman-always-when-it-exits.patch
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.
@@ -36,6 +37,7 @@ RequiresPostUn:
 PkgBR:
     - openconnect
     - openvpn
+    - readline-devel
 PkgConfigBR:
     - xtables
     - glib-2.0 >= 2.28
@@ -60,7 +62,7 @@ ConfigOptions:
 NoSystemdService: True
 
 Files:
-    - "%doc AUTHORS COPYING INSTALL ChangeLog NEWS README"
+    - "%doc AUTHORS COPYING ChangeLog README"
     - "%{_sbindir}/*"
     - "%{_libdir}/%{name}/scripts/*"
     - "%config %{_sysconfdir}/dbus-1/system.d/*.conf"
@@ -73,7 +75,7 @@ SubPackages:
       Group: Development/Libraries
       Description: connman-devel contains development files for use with connman.
       Files:
-        - "%doc AUTHORS COPYING INSTALL"
+        - "%doc AUTHORS COPYING"
         - "%{_includedir}/%{name}/*.h"
         - "%{_libdir}/pkgconfig/*.pc"
 
