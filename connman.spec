@@ -9,7 +9,7 @@ Name:       connman
 # << macros
 
 Summary:    Connection Manager
-Version:    1.10
+Version:    1.11
 Release:    1
 Group:      Communications/ConnMan
 License:    GPLv2
@@ -161,7 +161,7 @@ systemctl daemon-reload
 /%{_lib}/systemd/system/connman.service
 /%{_lib}/systemd/system/network.target.wants/connman.service
 /%{_lib}/systemd/system/connman-vpn.service
-/%{_prefix}/share/dbus-1/system-services/net.connman.vpn.service
+%{_datadir}/dbus-1/system-services/net.connman.vpn.service
 # >> files
 # << files
 
