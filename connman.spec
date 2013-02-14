@@ -20,6 +20,7 @@ Source2:    main.conf
 Source100:  connman.yaml
 Patch0:     0001-Enable-tracing-with-config-file-for-connman.patch
 Patch1:     0002-Restart-connman-always-when-it-exits.patch
+Patch2:     0003-connman-request-connect-notify.patch
 Requires:   dbus >= 1.4
 Requires:   wpa_supplicant >= 0.7.1
 Requires:   bluez
@@ -89,6 +90,8 @@ FallbackTimeservers.
 %patch0 -p1
 # 0002-Restart-connman-always-when-it-exits.patch
 %patch1 -p1
+# 0003-connman-request-connect-notify.patch
+%patch2 -p1
 # >> setup
 # << setup
 

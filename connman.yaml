@@ -13,6 +13,7 @@ ExtraSources:
 Patches:
     - 0001-Enable-tracing-with-config-file-for-connman.patch
     - 0002-Restart-connman-always-when-it-exits.patch
+    - 0003-connman-request-connect-notify.patch
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.

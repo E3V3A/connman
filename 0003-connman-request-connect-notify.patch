@@ -1,0 +1,267 @@
+diff --git a/src/agent-connman.c b/src/agent-connman.c
+index 9ccba72..cdde0f1 100644
+--- a/src/agent-connman.c
++++ b/src/agent-connman.c
+@@ -625,3 +625,102 @@ int __connman_agent_request_browser(struct connman_service *service,
+ 
+ 	return -EINPROGRESS;
+ }
++
++
++struct request_connect_reply_data {
++	struct connman_service *service;
++	request_connect_cb_t callback;
++	void *user_data;
++};
++
++static void request_connect_cb(/*connman_bool_t authentication_done,*/
++                              const char *error,void *user_data)
++{
++// handle reply or timeout here
++
++}
++
++static void request_connect_reply(DBusMessage *reply, void *user_data)
++{
++    DBusMessageIter iter;
++    char *key;
++    int type;
++
++    struct request_connect_reply_data *connect_reply_data = user_data;
++    const char *error = NULL;
++
++    dbus_message_iter_init(reply, &iter);
++    if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR) {
++        error = dbus_message_get_error_name(reply);
++        if (g_strcmp0(error, "net.connman.Agent.Error.Canceled") == 0) {
++            setTryit(0);
++        }
++    }
++    dbus_message_iter_init(reply, &iter);
++    dbus_message_iter_get_basic(&iter, &key);
++
++    DBG(" request_connect_reply <<<<<<<<<<<<<<<<<<<<<<<<<<<<< %s", key);
++      
++		if (g_str_equal(key, "Clear")) {
++      setTryit(0);
++		} else if (g_str_equal(key, "Suppress")) {
++      setTryit(2);
++    }
++
++	g_free(connect_reply_data);
++
++}
++
++int __connman_agent_request_connection(void *user_data)
++{
++
++//    int trythis = (int)user_data;
++    DBG(" __connman_agent_request_connection <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
++    
++    request_connect_cb_t callback = request_connect_cb;
++    DBusMessage *message;
++    struct request_connect_reply_data *connect_reply_data;
++    const char *agent_sender, *agent_path;
++    int err;
++
++    connman_agent_get_info(&agent_sender, &agent_path);
++    if (agent_path == NULL) {
++        return -ESRCH;
++    }
++
++    message = dbus_message_new_method_call(agent_sender, agent_path,
++                                           CONNMAN_AGENT_INTERFACE,
++                                           "RequestConnect");
++
++    if (message == NULL) {
++        return -ENOMEM;
++    }
++
++    struct connman_service *def_service;
++    def_service = __connman_service_get_default();
++
++    connect_reply_data = g_try_new0(struct request_connect_reply_data, 1);
++    if (connect_reply_data == NULL) {
++        dbus_message_unref(message);
++        return -ENOMEM;
++    }
++
++    connect_reply_data->service = def_service;
++    connect_reply_data->callback = callback;
++    connect_reply_data->user_data =  user_data;
++// TODO is autoconnect - do not send
++
++    err = connman_agent_queue_message(def_service, message,
++                                      (150 * 1000), //timeout
++                                      request_connect_reply, connect_reply_data);
++
++    if (err < 0 && err != -EBUSY) {
++        DBG("Eerror %d sending connect request", err);
++        dbus_message_unref(message);
++        g_free(connect_reply_data);
++        return err;
++    }
++
++    dbus_message_unref(message);
++    return -EINPROGRESS;
++}
+diff --git a/src/agent.c b/src/agent.c
+index 5c3bd28..b0c76a7 100644
+--- a/src/agent.c
++++ b/src/agent.c
+@@ -28,10 +28,10 @@
+ #include <string.h>
+ 
+ #include <gdbus.h>
++#include "connman.h"
+ #include <connman/agent.h>
+ #include <connman/setting.h>
+ 
+-#include "connman.h"
+ 
+ static DBusConnection *connection = NULL;
+ static guint agent_watch = 0;
+@@ -133,6 +133,10 @@ static void agent_receive_message(DBusPendingCall *call, void *user_data)
+ 	struct connman_agent *queue_data = user_data;
+ 	DBusMessage *reply;
+ 	int err;
++    DBusMessageIter iter;
++    char *key;
++    const char *error = NULL;
++    int type;
+ 
+ 	DBG("waiting for %p received %p", agent_request, queue_data);
+ 
+@@ -143,8 +147,9 @@ static void agent_receive_message(DBusPendingCall *call, void *user_data)
+ 	}
+ 
+ 	reply = dbus_pending_call_steal_reply(call);
+-	dbus_pending_call_unref(call);
+-	queue_data->call = NULL;
++
++   	    dbus_pending_call_unref(call);
++	    queue_data->call = NULL;
+ 
+ 	if (dbus_message_is_error(reply,
+ 			"org.freedesktop.DBus.Error.Timeout") == TRUE ||
+@@ -177,7 +182,7 @@ int connman_agent_queue_message(void *user_context,
+ 	struct connman_agent_driver *driver;
+ 	int err;
+ 
+-	if (user_context == NULL || callback == NULL)
++	if (/*user_context == NULL ||*/ callback == NULL)
+ 		return -EBADMSG;
+ 
+ 	queue_data = g_new0(struct connman_agent, 1);
+@@ -187,12 +192,14 @@ int connman_agent_queue_message(void *user_context,
+ 	driver = get_driver();
+ 	DBG("driver %p", driver);
+ 
+-	if (driver != NULL && driver->context_ref != NULL) {
+-		queue_data->user_context = driver->context_ref(user_context);
+-		queue_data->driver = driver;
+-	} else
+-		queue_data->user_context = user_context;
+-
++  if (user_context != NULL) {
++      if (driver != NULL && driver->context_ref != NULL) {
++          queue_data->user_context = driver->context_ref(user_context);
++          queue_data->driver = driver;
++      } else {
++          queue_data->user_context = user_context;
++      }
++  }
+ 	queue_data->msg = dbus_message_ref(msg);
+ 	queue_data->timeout = timeout;
+ 	queue_data->callback = callback;
+@@ -277,6 +284,8 @@ int connman_agent_register(const char *sender, const char *path)
+ 	agent_sender = g_strdup(sender);
+ 	agent_path = g_strdup(path);
+ 
++//    setTryit(0);
++
+ 	agent_watch = g_dbus_add_disconnect_watch(connection, sender,
+ 						agent_disconnect, NULL, NULL);
+ 
+diff --git a/src/connman.h b/src/connman.h
+index 484d1e0..134da57 100644
+--- a/src/connman.h
++++ b/src/connman.h
+@@ -94,6 +94,9 @@ typedef void (* authentication_cb_t) (struct connman_service *service,
+ typedef void (* browser_authentication_cb_t) (struct connman_service *service,
+ 				connman_bool_t authentication_done,
+ 				const char *error, void *user_data);
++typedef void (* request_connect_cb_t) (/*struct connman_service *service,*/
++				/*connman_bool_t authentication_done,*/
++				const char *error, void *user_data);
+ int __connman_agent_request_passphrase_input(struct connman_service *service,
+ 				authentication_cb_t callback, void *user_data);
+ int __connman_agent_request_login_input(struct connman_service *service,
+@@ -101,6 +104,10 @@ int __connman_agent_request_login_input(struct connman_service *service,
+ int __connman_agent_request_browser(struct connman_service *service,
+ 				browser_authentication_cb_t callback,
+ 				const char *url, void *user_data);
++int __connman_agent_request_connection( /*struct connman_service *service,
++        authentication_cb_t callback, */void *user_data);
++
++void  setTryit(int i);
+ 
+ #include <connman/log.h>
+ 
+diff --git a/src/dnsproxy.c b/src/dnsproxy.c
+index f698cfd..cdc70d6 100644
+--- a/src/dnsproxy.c
++++ b/src/dnsproxy.c
+@@ -2662,6 +2662,8 @@ static gboolean tcp_listener_event(GIOChannel *channel, GIOCondition condition,
+ 	return TRUE;
+ }
+ 
++int tryit = 0;
++
+ static gboolean udp_listener_event(GIOChannel *channel, GIOCondition condition,
+ 							gpointer user_data)
+ {
+@@ -2677,7 +2679,7 @@ static gboolean udp_listener_event(GIOChannel *channel, GIOCondition condition,
+ 		connman_error("Error with UDP listener channel");
+ 		ifdata->udp_listener_watch = 0;
+ 		return FALSE;
+-	}
++	} 
+ 
+ 	sk = g_io_channel_unix_get_fd(channel);
+ 
+@@ -2690,11 +2692,20 @@ static gboolean udp_listener_event(GIOChannel *channel, GIOCondition condition,
+ 	DBG("Received %d bytes (id 0x%04x)", len, buf[0] | buf[1] << 8);
+ 
+ 	err = parse_request(buf, len, query, sizeof(query));
+-	if (err < 0 || (g_slist_length(server_list) == 0)) {
++
++    if (err < 0 || (g_slist_length(server_list) == 0)) {
+ 		send_response(sk, buf, len, (void *)&client_addr,
+ 				client_addr_len, IPPROTO_UDP);
++//  error no connection.
++
++    int tryitonce = 1;
++    setTryit(1);
++    DBG("DNS Error OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
++          if (__connman_agent_request_connection((void*)tryitonce) == -ESRCH) {
++        }
+ 		return TRUE;
+-	}
++     }
++
+ 
+ 	req = g_try_new0(struct request_data, 1);
+ 	if (req == NULL)
+@@ -3005,3 +3016,11 @@ void __connman_dnsproxy_cleanup(void)
+ 
+ 	g_hash_table_destroy(listener_table);
+ }
++
++void setTryit(int i)
++{
++
++    DBG("setTryit %d", i);
++    tryit = i;
++}
++
