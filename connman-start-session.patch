@@ -1,0 +1,74 @@
+diff --git a/src/session.c b/src/session.c
+index 07db2f1..16756e8 100644
+--- a/src/session.c
++++ b/src/session.c
+@@ -2069,7 +2069,11 @@ int __connman_session_init(void)
+ 	session_hash = g_hash_table_new_full(g_str_hash, g_str_equal,
+ 						NULL, cleanup_session);
+ 
+-	sessionmode = FALSE;
++  if (connman_setting_get_bool("StartSession") == TRUE) {
++      sessionmode = TRUE;
++  } else {
++      sessionmode = FALSE;
++  }
+ 	return 0;
+ }
+ 
+--- a/src/main.c
++++ b/src/main.c
+@@ -72,6 +72,7 @@
+ 	connman_bool_t single_tech;
+ 	char **tethering_technologies;
+ 	connman_bool_t persistent_tethering_mode;
++       connman_bool_t start_session;
+ } connman_settings  = {
+ 	.bg_scan = TRUE,
+ 	.pref_timeservers = NULL,
+@@ -85,6 +86,7 @@
+ 	.single_tech = FALSE,
+ 	.tethering_technologies = NULL,
+ 	.persistent_tethering_mode = FALSE,
++       .start_session = FALSE,
+ };
+ 
+ #define CONF_BG_SCAN                    "BackgroundScanning"
+@@ -99,6 +101,7 @@
+ #define CONF_SINGLE_TECH                "SingleConnectedTechnology"
+ #define CONF_TETHERING_TECHNOLOGIES      "TetheringTechnologies"
+ #define CONF_PERSISTENT_TETHERING_MODE  "PersistentTetheringMode"
++#define CONF_START_SESSION               "StartSession"
+ 
+ static const char *supported_options[] = {
+ 	CONF_BG_SCAN,
+@@ -113,6 +116,7 @@
+ 	CONF_SINGLE_TECH,
+ 	CONF_TETHERING_TECHNOLOGIES,
+ 	CONF_PERSISTENT_TETHERING_MODE,
++       CONF_START_SESSION,
+ 	NULL
+ };
+ 
+@@ -334,7 +338,12 @@
+ 			CONF_SINGLE_TECH, &error);
+ 	if (error == NULL)
+ 		connman_settings.single_tech = boolean;
++	g_clear_error(&error);
+ 
++	boolean = g_key_file_get_boolean(config, "General",
++			CONF_START_SESSION, &error);
++	if (error == NULL)
++		connman_settings.start_session = boolean;
+ 	g_clear_error(&error);
+ 
+ 	tethering = g_key_file_get_string_list(config, "General",
+@@ -526,6 +535,9 @@
+ 	if (g_str_equal(key, CONF_PERSISTENT_TETHERING_MODE) == TRUE)
+ 		return connman_settings.persistent_tethering_mode;
+ 
++	if (g_str_equal(key, CONF_START_SESSION) == TRUE)
++		return connman_settings.start_session;
++
+ 	return FALSE;
+ }
+ 

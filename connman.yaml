@@ -1,6 +1,6 @@
 Name: connman
 Summary: Connection Manager
-Version: 1.13
+Version: 1.14
 Release: 1
 Group: Communications/ConnMan
 License: GPLv2
@@ -14,6 +14,7 @@ Patches:
     - 0001-Enable-tracing-with-config-file-for-connman.patch
     - 0002-Restart-connman-always-when-it-exits.patch
     - 0003-connman-request-connect-notify.patch
+    - connman-start-session.patch
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.
@@ -111,4 +112,16 @@ SubPackages:
         - connman-configs
       Files:
         - "%config %{_sysconfdir}/connman/main.conf"
+
+    - Name: docs
+      Summary: Documentation for connman
+      Group: Documentation
+      Description: |
+         Documentation for connman.
+      Requires:
+          - "%{name} = %{version}"
+      Files:
+        - "%{_datadir}/man/man5/connman.conf.5.gz"
+        - "%{_datadir}/man/man8/connman.8.gz"
+
 
