@@ -85,19 +85,19 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +static void request_connect_cb(/*connman_bool_t authentication_done,*/
 +                              const char *error,void *user_data)
 +{
-+// handle reply or timeout here
++ DBG("request_connect_c handle reply or timeout here");
 +
 +}
 +
 +static void request_connect_reply(DBusMessage *reply, void *user_data)
-+{
++{   DBG(" request_connect_reply <<<<<<<<<<<<<<<<<<<<<<<<<<<<< ");
 +    DBusMessageIter iter;
 +    char *key;
 +    int type;
 +
 +    struct request_connect_reply_data *connect_reply_data = user_data;
 +    const char *error = NULL;
-+
++    DBG("dbus_message_get_type(reply), %d",dbus_message_get_type(reply));
 +    dbus_message_iter_init(reply, &iter);
 +    if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR) {
 +        error = dbus_message_get_error_name(reply);
@@ -105,8 +105,8 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +            setTryit(0);
 +        }
 +    }
-+    dbus_message_iter_init(reply, &iter);
-+    dbus_message_iter_get_basic(&iter, &key);
++    if(dbus_message_iter_init(reply, &iter)) {
++        dbus_message_iter_get_basic(&iter, &key);
 +
 +    DBG(" request_connect_reply <<<<<<<<<<<<<<<<<<<<<<<<<<<<< %s", key);
 +      
@@ -114,8 +114,8 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +      setTryit(0);
 +		} else if (g_str_equal(key, "Suppress")) {
 +      setTryit(2);
-+    }
-+
++    } } else {
++    setTryit(0); }
 +	g_free(connect_reply_data);
 +
 +}
@@ -160,7 +160,7 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +// TODO is autoconnect - do not send
 +
 +    err = connman_agent_queue_message(def_service, message,
-+                                      (150 * 1000), //timeout
++                                      connman_timeout_input_request(), //timeout
 +                                      request_connect_reply, connect_reply_data);
 +
 +    if (err < 0 && err != -EBUSY) {
@@ -224,18 +224,18 @@ diff -ubNr connman-1.13/src/dnsproxy.c connman-1.13.a/src/dnsproxy.c
 +            ok = TRUE;
 +        }
 +    }
-+    if (ok) {
-+        setTryit(1);
-+        tryit = 1;
++    if (ok && tryit !=2) {
++        DBG("tryit is: %d",tryit);
++        //tryit = 1;
 +          // tell agent about it
-+    DBG("DNS Error OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
++          DBG("DNS Error OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 +        if (__connman_agent_request_connection((void*)tryit) == -ESRCH) {
-+        }
++        } 
 +    }
 +//    int tryitonce = 1;
-+//    setTryit(1);
-+  //        if (__connman_agent_request_connection((void*)tryitonce) == -ESRCH) {
-+   //     }
++    setTryit(2);
++  // 
++   // 
  		return TRUE;
  	}
  

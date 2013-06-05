@@ -9,7 +9,7 @@ Name:       connman
 # << macros
 
 Summary:    Connection Manager
-Version:    1.14
+Version:    1.15
 Release:    1
 Group:      Communications/ConnMan
 License:    GPLv2
