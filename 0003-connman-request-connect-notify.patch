@@ -85,19 +85,19 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +static void request_connect_cb(/*connman_bool_t authentication_done,*/
 +                              const char *error,void *user_data)
 +{
-+ DBG("request_connect_c handle reply or timeout here");
++// handle reply or timeout here
 +
 +}
 +
 +static void request_connect_reply(DBusMessage *reply, void *user_data)
-+{   DBG(" request_connect_reply <<<<<<<<<<<<<<<<<<<<<<<<<<<<< ");
++{
 +    DBusMessageIter iter;
 +    char *key;
 +    int type;
 +
 +    struct request_connect_reply_data *connect_reply_data = user_data;
 +    const char *error = NULL;
-+    DBG("dbus_message_get_type(reply), %d",dbus_message_get_type(reply));
++
 +    dbus_message_iter_init(reply, &iter);
 +    if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR) {
 +        error = dbus_message_get_error_name(reply);
@@ -105,17 +105,17 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +            setTryit(0);
 +        }
 +    }
-+    if(dbus_message_iter_init(reply, &iter)) {
-+        dbus_message_iter_get_basic(&iter, &key);
++    dbus_message_iter_init(reply, &iter);
++    dbus_message_iter_get_basic(&iter, &key);
 +
 +    DBG(" request_connect_reply <<<<<<<<<<<<<<<<<<<<<<<<<<<<< %s", key);
 +      
 +		if (g_str_equal(key, "Clear")) {
 +      setTryit(0);
 +		} else if (g_str_equal(key, "Suppress")) {
-+      setTryit(2);
-+    } } else {
-+    setTryit(0); }
++      setTryit(1);
++    }
++
 +	g_free(connect_reply_data);
 +
 +}
@@ -160,7 +160,7 @@ diff -ubNr connman-1.13/src/agent-connman.c connman-1.13.a/src/agent-connman.c
 +// TODO is autoconnect - do not send
 +
 +    err = connman_agent_queue_message(def_service, message,
-+                                      connman_timeout_input_request(), //timeout
++                                      connman_timeout_input_request(),
 +                                      request_connect_reply, connect_reply_data);
 +
 +    if (err < 0 && err != -EBUSY) {
@@ -197,19 +197,31 @@ diff -ubNr connman-1.13/src/connman.h connman-1.13.a/src/connman.h
  
  #include <connman/log.h>
  
-diff -ubNr connman-1.13/src/dnsproxy.c connman-1.13.a/src/dnsproxy.c
---- connman-1.13/src/dnsproxy.c	2013-04-09 10:38:59.000000000 +1000
-+++ connman-1.13.a/src/dnsproxy.c	2013-04-19 15:01:17.800286735 +1000
-@@ -3061,6 +3061,8 @@
+--- connman-1.13/src/dnsproxy.c.orig	2013-05-07 12:50:02.620324254 +1000
++++ connman-1.13.a/src/dnsproxy.c	2013-07-18 09:41:09.620324254 +1000
+@@ -3061,6 +3061,21 @@
  				&ifdata->tcp6_listener_watch);
  }
  
 +int tryit = 0;
 +
++void setTryit(int i)
++{
++    DBG("setTryit %d", i);
++    tryit = i;
++}
++
++static gboolean reset_connect_request(gpointer data)
++{
++    DBG("reset_connect_request");
++    tryit = 0;
++    return FALSE;
++}
++
  static gboolean udp_listener_event(GIOChannel *channel, GIOCondition condition,
  				struct listener_data *ifdata, int family,
  				guint *listener_watch)
-@@ -3103,6 +3105,29 @@
+@@ -3103,6 +3118,27 @@
  	if (err < 0 || (g_slist_length(server_list) == 0)) {
  		send_response(sk, buf, len, client_addr,
  				*client_addr_len, IPPROTO_UDP);
@@ -224,30 +236,28 @@ diff -ubNr connman-1.13/src/dnsproxy.c connman-1.13.a/src/dnsproxy.c
 +            ok = TRUE;
 +        }
 +    }
-+    if (ok && tryit !=2) {
-+        DBG("tryit is: %d",tryit);
-+        //tryit = 1;
++    if (ok && tryit == 0) {
++          //
++        	g_timeout_add_seconds(10, reset_connect_request, NULL);
++
++          tryit = 1;
 +          // tell agent about it
-+          DBG("DNS Error OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
++        DBG("DNS Error OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 +        if (__connman_agent_request_connection((void*)tryit) == -ESRCH) {
-+        } 
++        }
 +    }
-+//    int tryitonce = 1;
-+    setTryit(2);
-+  // 
-+   // 
  		return TRUE;
  	}
  
-@@ -3540,3 +3565,11 @@
- 
- 	g_hash_table_destroy(partial_tcp_req_table);
- }
-+
-+void setTryit(int i)
-+{
-+
-+    DBG("setTryit %d", i);
-+    tryit = i;
-+}
-+
+
+
+
+
+
+
+
+
+
+
+
+
