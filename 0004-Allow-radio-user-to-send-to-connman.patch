@@ -1,0 +1,26 @@
+From 9d5f7388b0866b8513bc620ad889fa0aa6059172 Mon Sep 17 00:00:00 2001
+From: Aaron McCarthy <aaron.mccarthy@jollamobile.com>
+Date: Fri, 26 Jul 2013 15:58:06 +1000
+Subject: [PATCH] Allow radio user to send to connman.
+
+---
+ src/connman-dbus.conf | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/connman-dbus.conf b/src/connman-dbus.conf
+index 98a773e..4816cdf 100644
+--- a/src/connman-dbus.conf
++++ b/src/connman-dbus.conf
+@@ -8,6 +8,9 @@
+         <allow send_interface="net.connman.Counter"/>
+         <allow send_interface="net.connman.Notification"/>
+     </policy>
++    <policy user="radio">
++        <allow send_destination="net.connman"/>
++    </policy>
+     <policy at_console="true">
+         <allow send_destination="net.connman"/>
+     </policy>
+-- 
+1.8.3.2
+

@@ -15,6 +15,7 @@ Patches:
     - 0002-Restart-connman-always-when-it-exits.patch
     - 0003-connman-request-connect-notify.patch
     - connman-start-session.patch
+    - 0004-Allow-radio-user-to-send-to-connman.patch
 Description: |
     Connection Manager provides a daemon for managing Internet connections
     within embedded devices running the Linux operating system.
