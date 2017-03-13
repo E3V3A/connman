@@ -47,6 +47,8 @@
 
 #define TIMEOUT 60000
 
+/* The connman-jollagps plugin allows Flight Mode to toggle GPS powered/enablement */
+
 static DBusConnection *connection;
 
 static struct connman_device *jolla_gps_device;
@@ -114,12 +116,7 @@ static int jolla_gps_enable(struct connman_device *device)
 
     DBG("");
 
-    if (connman_device_get_string(jolla_gps_device, "Path") == NULL) {
-        connman_device_set_powered(jolla_gps_device, TRUE);
-        return 0;
-    }
-
-    return change_powered(connection, TRUE);
+    return -EOPNOTSUPP;
 }
 
 static int jolla_gps_disable(struct connman_device *device)
@@ -128,12 +125,7 @@ static int jolla_gps_disable(struct connman_device *device)
 
     DBG("");
 
-    if (connman_device_get_string(jolla_gps_device, "Path") == NULL) {
-        connman_device_set_powered(jolla_gps_device, FALSE);
-        return 0;
-    }
-
-    return change_powered(connection, FALSE);
+    return -EOPNOTSUPP;
 }
 
 static int jolla_gps_probe(struct connman_device *device)
@@ -177,11 +169,22 @@ static void jolla_gps_tech_remove(struct connman_technology *technology)
     DBG("");
 }
 
+static void jolla_gps_tech_set_offline(bool offline)
+{
+    if (connman_device_get_string(jolla_gps_device, "Path") == NULL) {
+        connman_device_set_powered(jolla_gps_device, !offline);
+        // TODO: now need to send some dbus message to DeviceControl to wake it up...
+    } else {
+        (void)change_powered(connection, !offline);
+    }
+}
+
 static struct connman_technology_driver tech_driver = {
     .name = "gps",
     .type = CONNMAN_SERVICE_TYPE_GPS,
     .probe = jolla_gps_tech_probe,
     .remove = jolla_gps_tech_remove,
+    .set_offline = jolla_gps_tech_set_offline,
 };
 
 static void jolla_gps_connect(DBusConnection *conn, void *user_data)
@@ -282,7 +285,7 @@ static int jolla_gps_init()
 
     jolla_gps_device = connman_device_create("gps", CONNMAN_DEVICE_TYPE_GPS);
     if (jolla_gps_device == NULL) {
-        connman_warn("Failed to creat GPS device");
+        connman_warn("Failed to create GPS device");
         return -ENODEV;
     }
 
