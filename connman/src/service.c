@@ -718,7 +718,7 @@ static int service_load(struct connman_service *service)
 		autoconnect = g_key_file_get_boolean(keyfile,
 				service->identifier, "AutoConnect", &error);
 		if (!error)
-			service->autoconnect = autoconnect;
+			service_set_autoconnect(service, autoconnect);
 		g_clear_error(&error);
 		break;
 	}
