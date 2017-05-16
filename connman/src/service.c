@@ -4931,9 +4931,10 @@ bool __connman_service_remove(struct connman_service *service)
 			__connman_provider_is_immutable(service->provider))
 		return false;
 
-	if (!service->favorite && service->state !=
-						CONNMAN_SERVICE_STATE_FAILURE)
-		return false;
+	/* Not clear what was the meaning of this restriction: */
+//	if (!service->favorite && service->state !=
+//						CONNMAN_SERVICE_STATE_FAILURE)
+//		return false;
 
 	/* We don't want the service files to stay around forever */
 	__connman_storage_remove_service(service->identifier);
