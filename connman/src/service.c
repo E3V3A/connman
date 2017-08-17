@@ -1814,9 +1814,9 @@ static gboolean service_autoconnect_value(struct connman_service *service)
 	return service->autoconnect;
 }
 
-static gboolean service_available_value(struct connman_service *service)
+static gboolean is_available(struct connman_service *service)
 {
-	return service->network != NULL;
+	return service->network || service->provider;
 }
 
 static gboolean service_saved_value(struct connman_service *service)
@@ -1827,7 +1827,7 @@ static gboolean service_saved_value(struct connman_service *service)
 static const struct connman_service_boolean_property service_autoconnect =
 	{ "AutoConnect", service_autoconnect_value };
 static const struct connman_service_boolean_property service_available =
-	{ PROP_AVAILABLE, service_available_value };
+	{ PROP_AVAILABLE, is_available };
 static const struct connman_service_boolean_property service_saved =
 	{ PROP_SAVED, service_saved_value };
 
@@ -4477,7 +4477,7 @@ static void preferred_tech_add_by_type(gpointer data, gpointer user_data)
 	struct preferred_tech_data *tech_data = user_data;
 
 	/* Ignore unavailable services (without the network) */
-	if (service->type == tech_data->type && service->network) {
+	if (service->type == tech_data->type && is_available(service)) {
 		tech_data->preferred_list =
 			g_list_append(tech_data->preferred_list, service);
 
@@ -4549,7 +4549,7 @@ static bool auto_connect_service(GList *services,
 		 * rest of them are unavailable too (see service_compare),
 		 * so we can break out early.
 		 */
-		if (!service->network)
+		if (!is_available(service))
 			break;
 
 		if (ignore[service->type] || busy[service->type])
@@ -4581,7 +4581,7 @@ static bool auto_connect_service(GList *services,
 		 * rest of them are unavailable too (see service_compare),
 		 * so we can break out early.
 		 */
-		if (!service->network)
+		if (!is_available(service))
 			break;
 
 		if (ignore[service->type] || !service->autoconnect) {
@@ -5702,9 +5702,12 @@ static gint service_compare(gconstpointer a, gconstpointer b)
 	gint strength;
 
 	/* Compare availability first */
-	if (service_a->network && !service_b->network)
+        const gboolean a_available = is_available(service_a);
+        const gboolean b_available = is_available(service_b);
+
+	if (a_available && !b_available)
 		return -1;
-	if (!service_a->network && service_b->network)
+	if (!a_available && b_available)
 		return 1;
 
 	state_a = service_a->state;
@@ -5749,6 +5752,11 @@ static gint service_compare(gconstpointer a, gconstpointer b)
 
 	if (service_a->type != service_b->type) {
 
+		if (service_a->type == CONNMAN_SERVICE_TYPE_VPN)
+			return -1;
+		if (service_b->type == CONNMAN_SERVICE_TYPE_VPN)
+			return 1;
+
 		if (service_a->type == CONNMAN_SERVICE_TYPE_ETHERNET)
 			return -1;
 		if (service_b->type == CONNMAN_SERVICE_TYPE_ETHERNET)
@@ -5767,11 +5775,6 @@ static gint service_compare(gconstpointer a, gconstpointer b)
 		if (service_a->type == CONNMAN_SERVICE_TYPE_BLUETOOTH)
 			return -1;
 		if (service_b->type == CONNMAN_SERVICE_TYPE_BLUETOOTH)
-			return 1;
-
-		if (service_a->type == CONNMAN_SERVICE_TYPE_VPN)
-			return -1;
-		if (service_b->type == CONNMAN_SERVICE_TYPE_VPN)
 			return 1;
 
 		if (service_a->type == CONNMAN_SERVICE_TYPE_GADGET)
@@ -7775,9 +7778,6 @@ struct connman_service *__connman_service_lookup_from_index(int index)
 
 	for (list = service_list; list; list = list->next) {
 		service = list->data;
-
-		if (!service->network)
-			continue;
 
 		if (__connman_ipconfig_get_index(service->ipconfig_ipv4)
 							== index)
