@@ -12,7 +12,8 @@ include_HEADERS = include/log.h include/plugin.h \
 			include/storage.h include/provision.h \
 			include/session.h include/ipaddress.h include/agent.h \
 			include/inotify.h include/peer.h include/machine.h \
-			include/technology.h
+			include/technology.h include/exposed_api.h \
+			include/dbus.h include/gdbus_external.h
 
 nodist_include_HEADERS = include/version.h
 
