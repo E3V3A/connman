@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef __CONNMAN_FIREWALL_H
-#define __CONNMAN_FIREWALL_H
+#ifndef _CONNMAN_IPTABLES_EXTENSION_H
+#define _CONNMAN_IPTABLES_EXTENSION_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -78,4 +78,4 @@ const char* connman_iptables_default_save_path(int ip_version);
 }
 #endif
 
-#endif /* __CONNMAN_FIREWALL_H */
+#endif /* _CONNMAN_IPTABLES_EXTENSION_H */
