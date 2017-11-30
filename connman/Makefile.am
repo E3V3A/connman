@@ -13,7 +13,7 @@ include_HEADERS = include/log.h include/plugin.h \
 			include/session.h include/ipaddress.h include/agent.h \
 			include/inotify.h include/peer.h include/machine.h \
 			include/technology.h include/iptables_extension.h \
-			include/dbus.h include/gdbus_external.h
+			include/dbus.h gdbus/gdbus.h
 
 nodist_include_HEADERS = include/version.h
 
@@ -537,6 +537,11 @@ include/connman/version.h: include/version.h
 include/connman/%.h: $(abs_top_srcdir)/include/%.h
 	$(AM_V_at)$(MKDIR_P) include/connman
 	$(AM_V_GEN)$(LN_S) $< $@
+	
+include/connman/gdbus.h: $(abs_top_srcdir)/gdbus/gdbus.h
+	$(AM_V_at)$(MKDIR_P) include/connman
+	$(AM_V_GEN)$(LN_S) $< $@
+
 
 clean-local:
 	@$(RM) -rf include/connman $(MANUAL_PAGES)
